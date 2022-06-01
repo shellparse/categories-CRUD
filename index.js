@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_URI)
 .then((result)=>{console.log(result.connections[0].name)},(rejected)=>{console.log(rejected)});
 
-const catSchema = mongoose.Schema({
+const categorySchema = new mongoose.Schema({
 slug:{type:String,unique:true, required:true,dropDups:true},
 locale:[{type:mongoose.Schema.Types.ObjectId,ref:"Locale"}],
 media:{type:mongoose.Schema.Types.ObjectId,ref:"Media"},
@@ -21,11 +21,48 @@ is_indexed:{type:Boolean},
 published_at:{type:Date},
 created_at:{type:Date},
 updated_at:{type:Date}
+});
+
+const Category = mongoose.model("Category",categorySchema);
+const settingsSchema = new mongoose.Schema({
+  is_premium:{type:Boolean},
+  excluded_domains:[{type:String}],
+  excluded_countries_iso:[{type:String}],
+  excluded_network_endpoints:[{type:Number}],
+  age_rating:{type:String}
+});
+const Settings = mongoose.model("Settings",settingsSchema);
+const mediaSchema = new mongoose.Schema({
+  icon:{type:String},
+  portrait:[{type:String}],
+  landscape:[{type:String}],
+  square:[{type:String}]
+});
+const Media = mongoose.model("Media",mediaSchema);
+const LocaleSchema = new mongoose.Schema({
+  language_iso:{type:String},
+  title:{type:String},
+  seo_title:{type:String},
+  summary:{type:String},
+  seo_summary:{type:String},
+  description:{type:String},
+  seo_description:{type:String},
+  specify_seo_values:{type:Boolean}
+});
+const Locale = mongoose.model("Locale",LocaleSchema);
+const locksSchema = new mongoose.Schema({
+  is_locked_for_editing:{type:String},
+  current_editor:{type:String},
+  is_locked_for_moderation_process:{type:String},
+  is_locked_for_backend_process:{type:String},
+  current_backend_process:{type:String}
 })
+const Locks = mongoose.model("Locks",locksSchema);
 
 
+Category.create({slug:"games"}).then((result)=>console.log(result)).catch((err=>console.error(err)));
 
-
+// do the create 
 
 
 
