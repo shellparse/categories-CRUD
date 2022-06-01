@@ -1,20 +1,23 @@
 {
-	"name": "fcc-exercise-tracker",
+	"name": "categories",
 	"version": "0.1.0",
-	"description": "A REST API project, part of Free Code Camp's curriculum",
+	"description": "A REST API project, base bone backend test",
 	"main": "index.js",
 	"scripts": {
-		"start": "node index.js"
+		"start": "node index.js",
+		"test": "mocha tests/tests.js"
 	},
 	"dependencies": {
 		"body-parser": "^1.20.0",
+		"chai": "^4.3.6",
 		"cors": "^2.8.5",
 		"dotenv": "^8.2.0",
 		"express": "^4.16.4",
+		"mocha": "^10.0.0",
 		"mongoose": "^6.3.2"
 	},
 	"repository": {
-		"url": "https://github.com/freeCodeCamp/boilerplate-project-exercisetracker"
+		"url": "https://github.com/shellparse/categories-CRUD"
 	},
 	"license": "MIT",
 	"keywords": [

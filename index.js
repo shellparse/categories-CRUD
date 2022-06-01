@@ -1,30 +1,61 @@
-const express = require('express')
-const app = express()
-const cors = require('cors')
-require('dotenv').config()
-const bodyParse = require("body-parser")
-const mongoose = require('mongoose')
-mongoose.connect("mongodb+srv://shellparse:Mido1991@cluster0.ogl5v.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
-.then((result)=>{console.log(result.connections[0].name)},(rejected)=>{console.log(rejected)})
+const express = require('express');
+const app = express();
+const cors = require('cors');
+require('dotenv').config();
+const bodyParse = require("body-parser");
+const mongoose = require('mongoose');
+mongoose.connect(process.env.MONGO_URI)
+.then((result)=>{console.log(result.connections[0].name)},(rejected)=>{console.log(rejected)});
+
+const catSchema = mongoose.Schema({
+slug:{type:String,unique:true, required:true,dropDups:true},
+locale:[{type:mongoose.Schema.Types.ObjectId,ref:"Locale"}],
+media:{type:mongoose.Schema.Types.ObjectId,ref:"Media"},
+settings:{type:mongoose.Schema.Types.ObjectId,ref:"Settings"},
+locks:{type:mongoose.Schema.Types.ObjectId,ref:"Locks"},
+parent_id:{type:String},
+ancestor_id:[{type:String}],
+product:{type:String},
+path:{type:String},
+is_indexed:{type:Boolean},
+published_at:{type:Date},
+created_at:{type:Date},
+updated_at:{type:Date}
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const userSchema = new mongoose.Schema({username:String,exercise:[{type:mongoose.Schema.Types.ObjectId,ref:"Exercise"}]});
 const User = mongoose.model("User",userSchema);
 const exerciseSchema = new mongoose.Schema({username:String,description:String,duration:Number,date:String,user_id:{type:mongoose.Schema.Types.ObjectId,ref:"User"}});
 const Exercise = mongoose.model("Exercise",exerciseSchema);
 
-app.use(bodyParse.json())
-app.use(bodyParse.urlencoded({extended:true}))
-app.use(cors())
-app.use(express.static('public'))
+
+app.use(bodyParse.json());
+app.use(bodyParse.urlencoded({extended:true}));
+app.use(cors());
+app.use(express.static('public'));
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
-
 app.post("/api/users",(req,res)=>{
 User.create({username:req.body.username},(err,result)=>{
   res.json(result);
 })
 })
-
 async function getAllUsers(){
    return await User.find();
 }

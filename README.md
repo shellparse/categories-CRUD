@@ -1,3 +1,3 @@
-# Exercise Tracker
+# categories microservice
 
-[![tracker-url](https://img.shields.io/static/v1?label=exerciseTracker&message=Live&color=gray&labelColor=green)](https://shellparsetrack.herokuapp.com/)
+[![categories-url](https://img.shields.io/static/v1?label=exerciseTracker&message=Live&color=gray&labelColor=green)](https://shellparsetrack.herokuapp.com/)
