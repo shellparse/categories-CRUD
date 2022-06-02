@@ -7,23 +7,7 @@ const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_URI)
 .then((result)=>{console.log(result.connections[0].name)},(rejected)=>{console.log(rejected)});
 
-const categorySchema = new mongoose.Schema({
-slug:{type:String,unique:true, required:true,dropDups:true},
-locale:[{type:mongoose.Schema.Types.ObjectId,ref:"Locale"}],
-media:{type:mongoose.Schema.Types.ObjectId,ref:"Media"},
-settings:{type:mongoose.Schema.Types.ObjectId,ref:"Settings"},
-locks:{type:mongoose.Schema.Types.ObjectId,ref:"Locks"},
-parent_id:{type:String},
-ancestor_id:[{type:String}],
-product:{type:String},
-path:{type:String},
-is_indexed:{type:Boolean},
-published_at:{type:Date},
-created_at:{type:Date},
-updated_at:{type:Date}
-});
 
-const Category = mongoose.model("Category",categorySchema);
 const settingsSchema = new mongoose.Schema({
   is_premium:{type:Boolean},
   excluded_domains:[{type:String}],
@@ -59,14 +43,43 @@ const locksSchema = new mongoose.Schema({
 })
 const Locks = mongoose.model("Locks",locksSchema);
 
+const categorySchema = new mongoose.Schema({
+slug:{type:String,unique:true, required:true,dropDups:true},
+locale:[{type:mongoose.Schema.Types.ObjectId,ref:"Locale"}],
+media:{type:mediaSchema},
+settings:{type:settingsSchema},
+locks:{type:locksSchema},
+parent_id:{type:String},
+ancestor_id:[{type:String}],
+product:{type:String},
+path:{type:String},
+is_indexed:{type:Boolean},
+published_at:{type:Date},
+created_at:{type:Date},
+updated_at:{type:Date}
+});
+const Category = mongoose.model("Category",categorySchema);
 
-Category.create({slug:"games"}).then((result)=>console.log(result)).catch((err=>console.error(err)));
 
-// do the create 
+async function createCategory(){
+  return await Category.create({
+    slug:"games",
+    locale:await Locale.create({language_iso:"en",title:"new title"}).then((locale)=>locale._id),
+    media:await Media.create({icon:"favico"}),
+    settings:await Settings.create({is_premium:true,excluded_domains:["string1","string2"]}),
+    locks:await Locks.create({is_locked_for_editing:true}),
+    parent_id:null,
+    ancestor_id:null,
+    product:null,
+    path:null,
+    is_indexed:true,
+    published_at:null,
+    created_at:null,
+    updated_at:null
+  }).catch((err=>{throw err}));
+}
 
-
-
-
+module.exports.createCategory = createCategory;
 
 
 

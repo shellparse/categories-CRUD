@@ -1,12 +1,12 @@
-const index=require("../index.js");
-const chai = require("chai");
-const expect = chai.expect;
+const index= require("../index");
+const  expect = require("chai").expect;
 
 
-describe("Test1",()=>{
-    describe("created a category",()=>{
-        it("category should be created successfully",()=>{
-            expect(index.createCat("games").to.equal({category:"games"}))
+describe("Unit tests",function(){
+    describe("created a category",function(){
+        it("category should be created successfully",async function(){
+        let result = await index.createCategory();
+        expect(typeof result).to.equal("object");
         })
     })
 })
