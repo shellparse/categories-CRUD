@@ -61,7 +61,7 @@ updated_at:{type:Date}
 const Category = mongoose.model("Category",categorySchema);
 
 
-async function createCategory(){
+module.exports = async function createCategory(){
   return await Category.create({
     slug:"games",
     locale:await Locale.create({language_iso:"en",title:"new title"}).then((locale)=>locale._id),
@@ -79,7 +79,6 @@ async function createCategory(){
   }).catch((err=>{throw err}));
 }
 
-module.exports.createCategory = createCategory;
 
 
 
