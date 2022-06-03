@@ -9,78 +9,155 @@ mongoose.connect(process.env.MONGO_URI)
 
 
 const settingsSchema = new mongoose.Schema({
-  is_premium:{type:Boolean},
-  excluded_domains:[{type:String}],
-  excluded_countries_iso:[{type:String}],
-  excluded_network_endpoints:[{type:Number}],
-  age_rating:{type:String}
+  is_premium:{type:Boolean,required:true},
+  excluded_domains:[{type:[String,null],default:null}],
+  excluded_countries_iso:[{type:[String,null],default:null}],
+  excluded_network_endpoints:[{type:[Number,null],default:null}],
+  age_rating:{type:String,required:true}
 });
 const Settings = mongoose.model("Settings",settingsSchema);
 const mediaSchema = new mongoose.Schema({
-  icon:{type:String},
-  portrait:[{type:String}],
-  landscape:[{type:String}],
-  square:[{type:String}]
+  icon:{type:[String,null],default:null},
+  portrait:[{type:[String,null],default:null}],
+  landscape:[{type:[String,null],default:null}],
+  square:[{type:[String,null],default:null}]
 });
 const Media = mongoose.model("Media",mediaSchema);
 const LocaleSchema = new mongoose.Schema({
-  language_iso:{type:String},
-  title:{type:String},
-  seo_title:{type:String},
-  summary:{type:String},
-  seo_summary:{type:String},
-  description:{type:String},
-  seo_description:{type:String},
-  specify_seo_values:{type:Boolean}
+  language_iso:{type:String,required:true},
+  title:{type:String,required:true},
+  seo_title:{type:[String,null],default:null},
+  summary:{type:[String],required:true},
+  seo_summary:{type:[String,null],default:null},
+  description:{type:[String],required:true},
+  seo_description:{type:[String,null],default:null},
+  specify_seo_values:{type:Boolean,required:true}
 });
 const Locale = mongoose.model("Locale",LocaleSchema);
 const locksSchema = new mongoose.Schema({
-  is_locked_for_editing:{type:String},
-  current_editor:{type:String},
-  is_locked_for_moderation_process:{type:String},
-  is_locked_for_backend_process:{type:String},
-  current_backend_process:{type:String}
+  is_locked_for_editing:{type:[String,null],default:null},
+  current_editor:{type:[String,null],default:null},
+  is_locked_for_moderation_process:{type:[String,null],default:null},
+  is_locked_for_backend_process:{type:[String,null],default:null},
+  current_backend_process:{type:[String,null],default:null}
 })
 const Locks = mongoose.model("Locks",locksSchema);
 
 const categorySchema = new mongoose.Schema({
 slug:{type:String,unique:true, required:true,dropDups:true},
 locale:[{type:mongoose.Schema.Types.ObjectId,ref:"Locale"}],
-media:{type:mediaSchema},
-settings:{type:settingsSchema},
-locks:{type:locksSchema},
-parent_id:{type:String},
-ancestor_id:[{type:String}],
-product:{type:String},
-path:{type:String},
-is_indexed:{type:Boolean},
-published_at:{type:Date},
-created_at:{type:Date},
-updated_at:{type:Date}
+media:{type:mediaSchema,required:true},
+settings:{type:settingsSchema,required:true},
+locks:{type:locksSchema,required:true},
+parent_id:{type:[String,null],default:null},
+ancestor_ids:[{type:[String,null],default:null}],
+product:{type:[String,null],default:null},
+path:{type:[String,null],default:null},
+is_indexed:{type:Boolean,required:true},
+published_at:{type:[Date,null],default:null},
+created_at:{type:[Date,null],default:null},
+updated_at:{type:[Date,null],default:null}
 });
 const Category = mongoose.model("Category",categorySchema);
 
 
-module.exports = async function createCategory(){
-  return await Category.create({
-    slug:"games",
-    locale:await Locale.create({language_iso:"en",title:"new title"}).then((locale)=>locale._id),
-    media:await Media.create({icon:"favico"}),
-    settings:await Settings.create({is_premium:true,excluded_domains:["string1","string2"]}),
-    locks:await Locks.create({is_locked_for_editing:true}),
-    parent_id:null,
-    ancestor_id:null,
-    product:null,
-    path:null,
-    is_indexed:true,
-    published_at:null,
-    created_at:null,
-    updated_at:null
-  }).catch((err=>{throw err}));
+ function makeCategoryObj(slug,locale,media,settings,locks,parent_id,ancestor_ids,product,path,is_indexed,published_at,created_at,updated_at){
+  let category={};
+    if (typeof slug === "string"){category.slug=slug} else{throw new Error("slug is not a string")}
+    if (Array.isArray(locale)){
+      if(locale.length===0){
+        category.locale=locale
+      }else{
+        if(locale.filter(value,()=>mongoose.Types.ObjectId.isValid(value)&&typeof value ==="string").length===locale.length){
+          category.locale=locale
+        }else{
+          throw new Error("some of locale values are not a valid objext id")
+        }
+      }
+    }else{throw new Error("locale is not an Array")}
+    if (media instanceof Media){
+      category.media=media
+    }else{
+      throw new Error("media is not an instance of Media model")
+    }
+    if(settings instanceof Settings){
+      category.settings=settings
+    }else{
+      throw new Error("settings is not an instance of Setting model")
+    }
+    if(locks instanceof Locks){
+      category.locks=locks
+    }else{
+      throw new Error("locks is not an instance of Locks model")
+    }
+    if(typeof parent_id==="string"||parent_id===null){
+      category.parent_id=parent_id
+    }else{
+      throw new Error("parnet_id is not a string or not null")
+    }
+    if(Array.isArray(ancestor_ids)){
+      if(ancestor_ids.every((id)=>typeof id ==="string")||null)
+      category.ancestor_ids=ancestor_ids
+    }else{
+      throw new Error("ancestor_id is not an array of strings or not null")
+    }
+    if(typeof product==="string"||product===null){
+      category.product=product
+    }else{
+      throw new Error("product is not a string or not null")
+    }
+    if(typeof path==="string"||path===null){
+      category.path=path
+    }else{
+      throw new Error("path is not a string or not null")
+    }
+    if(typeof is_indexed==="boolean"){
+      category.is_indexed=is_indexed
+    }else{
+      throw new Error("is indexed is not boolean")
+    }
+    if(published_at instanceof Date||published_at===null){
+      category.published_at=published_at
+    }else{
+      throw new Error("published_at is not a date object or null")
+    }
+    if(created_at instanceof Date||created_at===null){
+      category.created_at=created_at
+    }else{
+      throw new Error("created_at is not a date object or null")
+    }
+    if(updated_at instanceof Date||updated_at===null){
+      category.updated_at=updated_at
+    }else{
+      throw new Error("updated_at is not a date object or null")
+    }
+  return category
+}
+module.exports={
+  makeCategoryObj,
+  Locale,Media,Settings,Locks
 }
 
 
-//first step to create a test is to detrmine what you want to do
+// module.exports = async function createCategory(){
+//   return await Category.create({
+//     slug:"games",
+//     locale:await Locale.create({language_iso:"en",title:"new title"}).then((locale)=>locale._id),
+//     media:await Media.create({icon:"favico"}),
+//     settings:await Settings.create({is_premium:true,excluded_domains:["string1","string2"]}),
+//     locks:await Locks.create({is_locked_for_editing:true}),
+//     parent_id:null,
+//     ancestor_id:null,
+//     product:null,
+//     path:null,
+//     is_indexed:true,
+//     published_at:null,
+//     created_at:null,
+//     updated_at:null
+//   }).catch((err=>{throw err}));
+// }
+
+
 
 
 
@@ -120,7 +197,6 @@ async function createEx(result,req){
 app.post("/api/users/:_id/exercises",(req,res)=>{
   User.findById(req.params._id,(err,result)=>{if(err)console.error(err)
     else{
-      console.log(result);
       createEx(result,req).then(result2=>{
         result.exercise.push(result2);
         result.save();
