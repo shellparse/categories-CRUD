@@ -1,3 +1,4 @@
+const validate=require("./validators")
 const express = require('express');
 const app = express();
 const cors = require('cors');
@@ -6,7 +7,6 @@ const bodyParse = require("body-parser");
 const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_URI)
 .then((result)=>{console.log(result.connections[0].name)},(rejected)=>{console.log(rejected)});
-
 
 const settingsSchema = new mongoose.Schema({
   is_premium:{type:Boolean,required:true},
@@ -59,117 +59,9 @@ created_at:{type:[Date,null],default:null},
 updated_at:{type:[Date,null],default:null}
 });
 const Category = mongoose.model("Category",categorySchema);
+module.exports={Locale,Media,Settings,Locks}
 
-
- function makeCategoryObj(slug,locale,media,settings,locks,parent_id,ancestor_ids,product,path,is_indexed,published_at,created_at,updated_at){
-  let category={};
-    if (typeof slug === "string"){category.slug=slug} else{throw new Error("slug is not a string")}
-    if (Array.isArray(locale)){
-      if(locale.length===0){
-        category.locale=locale
-      }else{
-        if(locale.filter(value,()=>mongoose.Types.ObjectId.isValid(value)&&typeof value ==="string").length===locale.length){
-          category.locale=locale
-        }else{
-          throw new Error("some of locale values are not a valid objext id")
-        }
-      }
-    }else{throw new Error("locale is not an Array")}
-    if (media instanceof Media){
-      category.media=media
-    }else{
-      throw new Error("media is not an instance of Media model")
-    }
-    if(settings instanceof Settings){
-      category.settings=settings
-    }else{
-      throw new Error("settings is not an instance of Setting model")
-    }
-    if(locks instanceof Locks){
-      category.locks=locks
-    }else{
-      throw new Error("locks is not an instance of Locks model")
-    }
-    if(typeof parent_id==="string"||parent_id===null){
-      category.parent_id=parent_id
-    }else{
-      throw new Error("parnet_id is not a string or not null")
-    }
-    if(Array.isArray(ancestor_ids)){
-      if(ancestor_ids.every((id)=>typeof id ==="string")||null)
-      category.ancestor_ids=ancestor_ids
-    }else{
-      throw new Error("ancestor_id is not an array of strings or not null")
-    }
-    if(typeof product==="string"||product===null){
-      category.product=product
-    }else{
-      throw new Error("product is not a string or not null")
-    }
-    if(typeof path==="string"||path===null){
-      category.path=path
-    }else{
-      throw new Error("path is not a string or not null")
-    }
-    if(typeof is_indexed==="boolean"){
-      category.is_indexed=is_indexed
-    }else{
-      throw new Error("is indexed is not boolean")
-    }
-    if(published_at instanceof Date||published_at===null){
-      category.published_at=published_at
-    }else{
-      throw new Error("published_at is not a date object or null")
-    }
-    if(created_at instanceof Date||created_at===null){
-      category.created_at=created_at
-    }else{
-      throw new Error("created_at is not a date object or null")
-    }
-    if(updated_at instanceof Date||updated_at===null){
-      category.updated_at=updated_at
-    }else{
-      throw new Error("updated_at is not a date object or null")
-    }
-  return category
-}
-module.exports={
-  makeCategoryObj,
-  Locale,Media,Settings,Locks
-}
-
-
-// module.exports = async function createCategory(){
-//   return await Category.create({
-//     slug:"games",
-//     locale:await Locale.create({language_iso:"en",title:"new title"}).then((locale)=>locale._id),
-//     media:await Media.create({icon:"favico"}),
-//     settings:await Settings.create({is_premium:true,excluded_domains:["string1","string2"]}),
-//     locks:await Locks.create({is_locked_for_editing:true}),
-//     parent_id:null,
-//     ancestor_id:null,
-//     product:null,
-//     path:null,
-//     is_indexed:true,
-//     published_at:null,
-//     created_at:null,
-//     updated_at:null
-//   }).catch((err=>{throw err}));
-// }
-
-
-
-
-
-
-
-
-const userSchema = new mongoose.Schema({username:String,exercise:[{type:mongoose.Schema.Types.ObjectId,ref:"Exercise"}]});
-const User = mongoose.model("User",userSchema);
-const exerciseSchema = new mongoose.Schema({username:String,description:String,duration:Number,date:String,user_id:{type:mongoose.Schema.Types.ObjectId,ref:"User"}});
-const Exercise = mongoose.model("Exercise",exerciseSchema);
-
-
+//server code
 app.use(bodyParse.json());
 app.use(bodyParse.urlencoded({extended:true}));
 app.use(cors());
@@ -177,8 +69,14 @@ app.use(express.static('public'));
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
-app.post("/api/users",(req,res)=>{
-User.create({username:req.body.username},(err,result)=>{
+//create a category
+app.post("/api/categories",(req,res)=>{
+Category.create(validate.makeCategoryObj(req.body.slug,req.body.locale,req.body.media,req.body.settings,
+  req.body.locks,req.body.parent_id,req.body.ancestor_ids,req.body.product,req.body.path,req.body.is_indexed,
+  req.body.published_at,req.body.created_at,req.body.updated_at),(err,result)=>{
+    if(err){
+      throw err;
+    }
   res.json(result);
 })
 })
