@@ -83,6 +83,7 @@ Category.create(validate.makeCategoryObj(req.body.slug,req.body.locale,req.body.
 async function getAllUsers(){
    return await User.find();
 }
+
 app.get("/api/users",(req,res)=>{
   getAllUsers().then((result)=>{res.json(result)})
 })
