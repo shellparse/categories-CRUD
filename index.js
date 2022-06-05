@@ -327,7 +327,7 @@ app.get('/', (req, res) => {
 });
 //create a category
 app.post("/api/create",(req,res)=>{
-  const {slug,locale=[],media=new Media(),settings=new Settings(),locks=new Locks(),parent_id=null,ancestor_ids=null,product=null,path=null,is_indexed,published_at=null,created_at=null,updated_at=null}=req.body;
+  const {slug,locale=[],media=new Media(),settings=new Settings({is_premium:req.body.is_premium==="true"?true:fales,age_rating:req.body.age_rating}),locks=new Locks(),parent_id=null,ancestor_ids=null,product=null,path=null,is_indexed,published_at=null,created_at=null,updated_at=null}=req.body;
 Category.create(makeCategoryObj(slug,locale,media,settings,locks,parent_id,ancestor_ids,
   product,path,is_indexed==="true"?true:false,published_at,created_at,updated_at),(err,result)=>{
     if(err){
