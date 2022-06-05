@@ -335,7 +335,7 @@ Category.create(makeCategoryObj(slug,locale,media,settings,locks,parent_id,ances
     }
   res.json(result);
 })
-res.json({"recived body is":req.body})
+
 })
 async function getAllUsers(){
    return await User.find();
