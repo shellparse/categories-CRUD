@@ -1,4 +1,3 @@
-const validate= require("../validators");
 const index=require("../index")
 const  expect = require("chai").expect;
 // to be used across the test for more readability
@@ -14,7 +13,7 @@ describe("Unit tests",function(){
         let slug="games";
         let locale=[];
         let media=new index.Media();
-        let settings=new index.Settings(validate.makeSettingsObj(true,[],[],[],"16"));
+        let settings=new index.Settings(index.makeSettingsObj(true,[],[],[],"16"));
         let locks=new index.Locks();
         let parent_id=null;
         let ancestor_ids=[];
@@ -24,7 +23,7 @@ describe("Unit tests",function(){
         let published_at=null;
         let created_at=null;
         let updated_at=null;
-        let result = validate.makeCategoryObj(slug,locale,media,settings,locks,
+        let result = index.makeCategoryObj(slug,locale,media,settings,locks,
         parent_id,ancestor_ids,product,path,is_indexed,published_at,created_at,updated_at);
         // test
         itExpectProperty(result,"slug",slug);
@@ -48,7 +47,7 @@ describe("Unit tests",function(){
         let excluded_countries_iso=[];
         let excluded_network_endpoints=[];
         let age_rating="16";
-        let result=validate.makeSettingsObj(is_premium,excluded_domains,excluded_countries_iso,excluded_network_endpoints,age_rating);
+        let result=index.makeSettingsObj(is_premium,excluded_domains,excluded_countries_iso,excluded_network_endpoints,age_rating);
         // test
         itExpectProperty(result,"is_premium",is_premium);
         itExpectProperty(result,"excluded_domains",excluded_domains);
@@ -62,7 +61,7 @@ describe("Unit tests",function(){
         let portrait=null;
         let landscape=null;
         let square=null;
-        let result=validate.makeMediaObj(icon,portrait,landscape,square);
+        let result=index.makeMediaObj(icon,portrait,landscape,square);
         //test
         itExpectProperty(result,"icon",icon);
         itExpectProperty(result,"portrait",portrait);
@@ -79,7 +78,7 @@ describe("Unit tests",function(){
         let description="the description";
         let seo_description=null;
         let specify_seo_values=false;
-        let result=validate.makeLocaleObj(language_iso,title,seo_title,summary,seo_summary,description,seo_description,specify_seo_values);
+        let result=index.makeLocaleObj(language_iso,title,seo_title,summary,seo_summary,description,seo_description,specify_seo_values);
         //test
         itExpectProperty(result,"language_iso",language_iso);
         itExpectProperty(result,"title",title);
@@ -97,7 +96,7 @@ describe("Unit tests",function(){
         let is_locked_for_moderation_process=null;
         let is_locked_for_backend_process=null;
         let current_backend_process=null;
-        let result=validate.makeLocksObj(is_locked_for_editing,current_editor,is_locked_for_moderation_process,is_locked_for_backend_process,current_backend_process);
+        let result=index.makeLocksObj(is_locked_for_editing,current_editor,is_locked_for_moderation_process,is_locked_for_backend_process,current_backend_process);
         //test
         itExpectProperty(result,"is_locked_for_editing",is_locked_for_editing);
         itExpectProperty(result,"current_editor",current_editor);
