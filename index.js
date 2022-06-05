@@ -70,15 +70,17 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
 //create a category
-app.post("/api/categories",(req,res)=>{
-Category.create(validate.makeCategoryObj(req.body.slug,req.body.locale,req.body.media,req.body.settings,
-  req.body.locks,req.body.parent_id,req.body.ancestor_ids,req.body.product,req.body.path,req.body.is_indexed,
-  req.body.published_at,req.body.created_at,req.body.updated_at),(err,result)=>{
+app.post("/api/create",(req,res)=>{
+  const {slug,locale=[],media,settings,locks,parent_id=null,ancestor_ids=null,product=null,path=null,is_indexed,published_at,created_at,updated_at}=req.body;
+  
+Category.create(validate.makeCategoryObj(slug,locale,media,settings,locks,parent_id,ancestor_ids,
+  product,path,is_indexed,published_at,created_at,updated_at),(err,result)=>{
     if(err){
       throw err;
     }
   res.json(result);
 })
+res.json({"recived body is":req.body})
 })
 async function getAllUsers(){
    return await User.find();
