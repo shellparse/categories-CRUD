@@ -394,8 +394,18 @@ app.post("/api/create",async (req,res)=>{
 })//end of create endpoint
 
 
-app.get("/api/users",(req,res)=>{
-  
+app.get("/api/category/:slug",(req,res)=>{
+  if(req.params.slug){
+    Category.findOne({slug:req.params.slug},(err,doc)=>{
+      if(doc){
+       res.json(doc);
+      }else{
+        res.json({"error":"no such category"})
+      }
+    })  
+  }else{
+    res.json({"error":"must provide category"})
+  }
 })
 
 app.post("/api/users/:_id/exercises",(req,res)=>{
