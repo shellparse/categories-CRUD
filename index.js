@@ -95,7 +95,7 @@ function matchArrTypeOrnull(prop,type){
       throw err(slug,"string")
     }
     if(Array.isArray(locale)){
-       if(locale.every((val)=>val instanceof Locale)){
+       if(locale.every((val)=>typeof val==="object")){
        category.locale=locale;
        }else{
          throw err(locale,"Locale")
@@ -111,7 +111,7 @@ function matchArrTypeOrnull(prop,type){
     if(settings instanceof Settings){
       category.settings=settings
     }else{
-      throw new Error("settings is not an instance of Setting model")
+      throw new Error("settings is not an instance of Settings model")
     }
     if(locks instanceof Locks){
       category.locks=locks
@@ -146,6 +146,7 @@ function matchArrTypeOrnull(prop,type){
     if(published_at instanceof Date||published_at===null){
       category.published_at=published_at
     }else{
+      console.log(published_at);
       throw new Error("published_at is not a date object or null")
     }
     if(created_at instanceof Date||created_at===null){
@@ -315,7 +316,6 @@ module.exports={
   Locks,Locale,Media,Settings
 }
 
-
 //server code
 app.use(bodyParse.json());
 app.use(bodyParse.urlencoded({extended:true}));
@@ -326,63 +326,83 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
 //create a category
-app.post("/api/create",(req,res)=>{
-  const {slug,locale=[],media=new Media(),settings=new Settings({is_premium:req.body.is_premium==="true"?true:fales,age_rating:req.body.age_rating}),locks=new Locks(),parent_id=null,ancestor_ids=null,product=null,path=null,is_indexed,published_at=null,created_at=null,updated_at=null}=req.body;
-Category.create(makeCategoryObj(slug,locale,media,settings,locks,parent_id,ancestor_ids,
-  product,path,is_indexed==="true"?true:false,published_at,created_at,updated_at),(err,result)=>{
-    if(err){
-      throw err;
-    }
-  res.json(result);
-})
 
-})
-async function getAllUsers(){
-   return await User.find();
+app.post("/api/create",async (req,res)=>{
+ try{
+  var {slug,locale=[],media=new Media(),settings=new Settings(),locks=new Locks(),parent_id=null,ancestor_ids=null,product=null,path=null,is_indexed,published_at=null,created_at=null,updated_at=null}=req.body;
+  let arrLocale=[];
+  
+    if(!slug){
+      throw "sulg must be provided"
+    }
+   if(locale.length>0&&locale.every((val)=>typeof val==="object")){
+     for (let index = 0; index < locale.length; index++) {
+      arrLocale.push(new Locale(locale[index]));
+     }
+  }
+  if(typeof req.body.media==="object"){
+     media= new Media(media);
+  }
+  if(settings instanceof Settings){
+  }else{
+    settings=new Settings(settings);
+  }
+  if(locks instanceof Locks){
+  }else{
+    locks=new Locks(locks);
+  }
+  if(published_at!=null&&/^([0-2][0-9]|(3)[0-1])(-)(((0)[0-9])|((1)[0-2]))(-)\d{4}$/.test(published_at)){
+      published_at=new Date( published_at.replace( /(\d{2})-(\d{2})-(\d{4})/, "$2/$1/$3") );
+  }else{
+      throw `${published_at} is not a valid date format should be DD-MM-YYY`;
+    }
+    if(created_at!=null&&/^([0-2][0-9]|(3)[0-1])(-)(((0)[0-9])|((1)[0-2]))(-)\d{4}$/.test(created_at)){
+      created_at=new Date( created_at.replace( /(\d{2})-(\d{2})-(\d{4})/, "$2/$1/$3") );
+    }else{
+      throw `${created_at} is not a valid date format should be DD-MM-YYY`;
+    }
+    if(updated_at!=null&&/^([0-2][0-9]|(3)[0-1])(-)(((0)[0-9])|((1)[0-2]))(-)\d{4}$/.test(updated_at)){
+      updated_at=new Date( updated_at.replace( /(\d{2})-(\d{2})-(\d{4})/, "$2/$1/$3") );
+    }else{
+      throw `${updated_at} is not a valid date format should be DD-MM-YYY`;
+    }
+  
+  Category.create(makeCategoryObj(slug,arrLocale.length>0?arrLocale:locale,media,settings,locks,parent_id,ancestor_ids,
+  product,path,is_indexed==="true"?true:false,published_at,created_at,updated_at),async (err,result)=>{
+    if(err){
+      if(err.code===11000){
+        res.json({error:"existing category detected",category:err.keyValue})
+        console.error(err)
+      }else{
+        res.json(err);
+        console.error(err)
+      }
+    }else{
+      for (let i = 0; i < arrLocale.length; i++) {
+        await arrLocale[i].save(); 
+      }
+      await media.save();
+      await settings.save();
+      await locks.save();
+      res.json(result);
+    }
+ 
+  })
+}catch (e){
+  res.json(e)
 }
+})//end of create endpoint
+
 
 app.get("/api/users",(req,res)=>{
-  getAllUsers().then((result)=>{res.json(result)})
+  
 })
-async function createEx(result,req){
-  console.log(result)
-  let waiting = await Exercise.create({username:result.username,description:req.body.description,duration:req.body.duration,date:req.body.date?new Date(req.body.date).toDateString():new Date().toDateString(),user_id:result._id})
-      .catch((err)=>console.log(err));
-      return waiting;
-}
+
 app.post("/api/users/:_id/exercises",(req,res)=>{
-  User.findById(req.params._id,(err,result)=>{if(err)console.error(err)
-    else{
-      createEx(result,req).then(result2=>{
-        result.exercise.push(result2);
-        result.save();
-        res.json({_id:result._id,username:result.username,date:result2.date,duration:result2.duration,description:result2.description,});
-      }); 
-    }
-    }
-  )//end of find
+ 
 });
 app.get("/api/users/:id/logs/",(req,res)=>{
-  let dateRegex= /^(19|20)\d\d[-\.](0[1-9]|1[012])[-\.](0[1-9]|[12][0-9]|3[01])$/;
-  User.findById(req.params.id).populate("exercise").then((pop)=>{
-    let filterdEx;
-    if(dateRegex.test(req.query.from)&&dateRegex.test(req.query.to)){
-      filterdEx=pop.exercise.filter((obj)=>{
-       return new Date(obj.date)>new Date(req.query.from)&&new Date(obj.date)<new Date(req.query.to)
-     });
-     if(Number.isInteger(parseInt(req.query.limit))){
-      filterdEx=filterdEx.slice(0,Number.parseInt(req.query.limit))
-      res.json({username:pop.username,count:pop.exercise.length,_id:pop._id,log:filterdEx})
-     }else{res.json({username:pop.username,count:filterdEx.length,_id:pop._id,log:filterdEx})}    
-    }
-    else{
-      if(Number.isInteger(parseInt(req.query.limit))){
-        filterdEx=pop.exercise.slice(0,Number.parseInt(req.query.limit))
-        res.json({username:pop.username,count:pop.exercise.length,_id:pop._id,log:filterdEx})
-       }else{
-    res.json({username:pop.username,count:pop.exercise.length,_id:pop._id,log:pop.exercise})
-        } }
-  }).catch((err)=>console.error(err))
+  
 })
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
