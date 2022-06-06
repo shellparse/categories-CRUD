@@ -8,7 +8,7 @@ use end point : POST:/api/create and send along the request body as json
 all properties marked with * are manadatory during creation
 
 example:
-{
+`{
     *"slug":"category",//string
     // locale field is optional but if you are sending an array of locales thin fields marked with > must be provided along
     "locale":[{
@@ -50,7 +50,7 @@ example:
     "published_at":"06-06-2022",//string will be stored as date object
     "created_at":"01-06-2022",//string will be stored as date object
     "updated_at":"07-06-2022"//string will be stored as date object
-}
+}`
 
 all optional fields will be filled with null 
 
