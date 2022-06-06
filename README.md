@@ -3,9 +3,9 @@
 a micro service to create categories and its connected entities Locales,Settings,Media,Locks
 
 to create a category :
-use end point : POST:/api/create and send along the request body as json
+use end point : `POST:/api/create` and send along the request body as json
 
-all properties marked with * are manadatory during creation
+#### all properties marked with * are manadatory during creation
 
 example:
 ```
@@ -54,6 +54,6 @@ example:
 }
 ```
 
-all optional fields will be filled with null 
+#### all optional fields will be filled with null 
 
 
