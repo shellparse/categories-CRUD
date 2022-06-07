@@ -1,46 +1,87 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Exercise Tracker | freeCodeCamp</title>
-    <link rel="shortcut icon" href="https://cdn.freecodecamp.org/universal/favicons/favicon.ico"  type="image/x-icon" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css" />
-    <link href="style.css" rel="stylesheet" type="text/css" />
-  </head>
 
-  <body>
-    <div class="container">
-      <h1>Exercise tracker</h1>
-      <form action="/api/users" method="post">
-        <h3>Create a New User</h3>
-        <p><code>POST /api/users</code></p>
-        <input id="uname" type="text" name="username" placeholder="username" />
-        <input type="submit" value="Submit" />
-      </form>
-      <form id="exercise-form" method="post">
-        <h3>Add exercises</h3>
-        <p><code>POST /api/users/:_id/exercises</code></p>
-        <input id="uid" type="text" name=":_id" placeholder=":_id" />
-        <input id="desc" type="text" name="description" placeholder="description*" />
-        <input id="dur" type="text" name="duration" placeholder="duration* (mins.)" />
-        <input id="date" type="text" name="date" placeholder="date (yyyy-mm-dd)" />
-        <input type="submit" value="Submit" />
-      </form>
-      <p>
-        <strong>GET user's exercise log: </strong>
-        <code>GET /api/users/:_id/logs?[from][&amp;to][&amp;limit]</code>
-      </p>
-      <p><strong>[ ]</strong> = optional</p>
-      <p><strong>from, to</strong> = dates (yyyy-mm-dd); <strong>limit</strong> = number</p>
-    </div>
-    <script>
-      const exerciseForm = document.getElementById("exercise-form");
 
-      exerciseForm.addEventListener("submit", () => {
-        const userId = document.getElementById("uid").value;
-        exerciseForm.action = `/api/users/${userId}/exercises`;
-
-        exerciseForm.submit();
-      });
-    </script>
-  </body>
-</html>
+    <html><head>
+    <link rel="stylesheet" href="style.css">
+    </head><body><h1 id="categories-microservice">categories microservice</h1>
+     <p>a micro service to create categories and its connected entities Locales,Settings,Media,Locks</p>
+     <hr>
+     <ul>
+     <li>To <strong>CREATE</strong> a category :
+     use end point : <code>POST:/api/create</code> and send along the request body as json
+     if request successful 
+     then you will get the created category object as json response
+     otherwise an error response</li>
+     </ul>
+     <h4 id="all-properties-marked-with-are-mandatory-during-creation">all properties marked with * are mandatory during creation</h4>
+     <p>all none mandatory are nullable</p>
+     <p><strong>Example:</strong></p>
+     <pre><code>{
+         * <span class="hljs-string">"slug"</span>:<span class="hljs-string">"category"</span>,//<span class="hljs-built_in">string</span>
+         // locale field <span class="hljs-keyword">is</span> optional but <span class="hljs-keyword">if</span> you are sending an <span class="hljs-built_in">array</span> <span class="hljs-keyword">of</span> locales
+         then fields marked <span class="hljs-keyword">with</span> * must be provided:
+     
+          <span class="hljs-string">"locale"</span>:[{
+             *<span class="hljs-string">"language_iso"</span>:<span class="hljs-string">"en"</span>,//<span class="hljs-built_in">string</span>
+             *<span class="hljs-string">"title"</span>:<span class="hljs-string">"my title"</span>,//<span class="hljs-built_in">string</span>
+             <span class="hljs-string">"seo_title"</span>:<span class="hljs-string">"my seo title"</span>,//<span class="hljs-built_in">string</span>
+             *<span class="hljs-string">"summary"</span>:<span class="hljs-string">"my summary"</span>, //<span class="hljs-built_in">string</span>
+             <span class="hljs-string">"seo_summary"</span>:<span class="hljs-string">"my seo summary"</span>,// <span class="hljs-built_in">string</span>
+             *<span class="hljs-string">"description"</span>:<span class="hljs-string">"my description"</span>,//<span class="hljs-built_in">string</span>
+             <span class="hljs-string">"seo_description"</span>:<span class="hljs-string">"my seo description"</span>,//<span class="hljs-built_in">string</span>
+             *<span class="hljs-string">"specify_seo_values"</span>:<span class="hljs-literal">true</span> // boolean
+         }],
+          <span class="hljs-string">"media"</span>:{
+             <span class="hljs-string">"icon"</span>:<span class="hljs-string">"media icon"</span>,//<span class="hljs-built_in">string</span>
+             <span class="hljs-string">"portrait"</span>:[<span class="hljs-string">"portrait1"</span>,<span class="hljs-string">"portrait2"</span>],// <span class="hljs-built_in">array</span> <span class="hljs-keyword">of</span> strings
+             <span class="hljs-string">"landscape"</span>:[<span class="hljs-string">"landscape1"</span>,<span class="hljs-string">"landscape2"</span>],// <span class="hljs-built_in">array</span> <span class="hljs-keyword">of</span> strings
+             <span class="hljs-string">"square"</span>:[<span class="hljs-string">"square1"</span>,<span class="hljs-string">"square2"</span>]// <span class="hljs-built_in">array</span> <span class="hljs-keyword">of</span> strings
+         },
+          *<span class="hljs-string">"settings"</span>:{
+             *<span class="hljs-string">"is_premium"</span>:<span class="hljs-literal">true</span>,//boolean
+             <span class="hljs-string">"excluded_domains"</span>:[<span class="hljs-string">"domain1"</span>,<span class="hljs-string">"domain2"</span>],//<span class="hljs-built_in">array</span> <span class="hljs-keyword">of</span> strings
+             <span class="hljs-string">"excluded_countries_iso"</span>:[<span class="hljs-string">"ar"</span>,<span class="hljs-string">"ak"</span>],//<span class="hljs-built_in">array</span> <span class="hljs-keyword">of</span> strings
+             <span class="hljs-string">"excluded_network_endpoints"</span>:[<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>],//<span class="hljs-built_in">array</span> <span class="hljs-keyword">of</span> numbers
+             *<span class="hljs-string">"age_rating"</span>:<span class="hljs-string">"17"</span>//<span class="hljs-built_in">string</span>
+         },
+          <span class="hljs-string">"locks"</span>:{
+             <span class="hljs-string">"is_locked_for_editing"</span>:<span class="hljs-string">"true"</span>,//<span class="hljs-built_in">string</span>
+             <span class="hljs-string">"current_editor"</span>:<span class="hljs-string">"mido"</span>,//<span class="hljs-built_in">string</span>
+             <span class="hljs-string">"is_locked_for_moderation_process"</span>:<span class="hljs-string">"locked"</span>,//<span class="hljs-built_in">string</span>
+             <span class="hljs-string">"is_locked_for_backend_process"</span>:<span class="hljs-string">"backend"</span>,//<span class="hljs-built_in">string</span>
+             <span class="hljs-string">"current_backend_process"</span>:<span class="hljs-string">"process"</span>//<span class="hljs-built_in">string</span>
+         },
+          <span class="hljs-string">"parent_id"</span>:<span class="hljs-string">"the parent"</span>,//<span class="hljs-built_in">string</span>
+          <span class="hljs-string">"ancestor_ids"</span>:[<span class="hljs-string">"our ancestors"</span>,<span class="hljs-string">"other ancestors"</span>],// <span class="hljs-built_in">array</span> <span class="hljs-keyword">of</span> strings
+          <span class="hljs-string">"product"</span>:<span class="hljs-string">"our awesome product"</span>,//<span class="hljs-built_in">string</span>
+          <span class="hljs-string">"path"</span>:<span class="hljs-string">"URI"</span>,//<span class="hljs-built_in">string</span>
+         * <span class="hljs-string">"is_indexed"</span>:<span class="hljs-literal">true</span>,//boolean
+         // date should follow <span class="hljs-type">DD</span>-<span class="hljs-type">MM</span>-<span class="hljs-type">YYYY</span> format
+          <span class="hljs-string">"published_at"</span>:<span class="hljs-string">"06-06-2022"</span>,//<span class="hljs-built_in">string</span> will be stored <span class="hljs-keyword">as</span> date <span class="hljs-keyword">object</span>
+          <span class="hljs-string">"created_at"</span>:<span class="hljs-string">"01-06-2022"</span>,//<span class="hljs-built_in">string</span> will be stored <span class="hljs-keyword">as</span> date <span class="hljs-keyword">object</span>
+          <span class="hljs-string">"updated_at"</span>:<span class="hljs-string">"07-06-2022"</span>//<span class="hljs-built_in">string</span> will be stored <span class="hljs-keyword">as</span> date <span class="hljs-keyword">object</span>
+     }
+     </code></pre><h4 id="all-optional-fields-will-be-filled-with-null-if-wasn-t-provided">all optional fields will be filled with null if wasn&#39;t provided</h4>
+     <hr>
+     <ul>
+     <li>To <strong>RETRIEVE</strong> a category use slug name since all categories are unique
+     simply send a <code>GET:/api/category/:slug</code></li>
+     </ul>
+     <p>on success the category document as json response will be returned otherwise 
+     error response</p>
+     <hr>
+     <ul>
+     <li>To <strong>EDIT</strong> a category send <code>PATCH:/api/category/:slug</code> with a json body of the fields that needs updating
+     following the same structure of every field in the create operation </li>
+     </ul>
+     <p><strong>Example:</strong></p>
+     <pre><code><span class="hljs-string">"media"</span>:{
+             <span class="hljs-string">"icon"</span>:<span class="hljs-string">"new media icon"</span>,
+             <span class="hljs-string">"portrait"</span>:[<span class="hljs-string">"new portrait1"</span>,<span class="hljs-string">" new portrait2"</span>],
+             <span class="hljs-string">"landscape"</span>:[<span class="hljs-string">"new landscape1"</span>,<span class="hljs-string">"new landscape2"</span>],
+             <span class="hljs-string">"square"</span>:[<span class="hljs-string">"new square1"</span>,<span class="hljs-string">"square2"</span>]
+         }
+     </code></pre><ul>
+     <li>To <strong>DELETE</strong> a category send <code>DELETE:/api/category/:slug</code> and if the category slug was found it will be deleted
+     and a copy of the category will be returned as json response otherwise error message</li>
+     </ul>
+     </body></html>

@@ -90,7 +90,7 @@ describe("Unit tests",function(){
         itExpectProperty(result,"specify_seo_values",specify_seo_values);
     })
     describe("#5 makeLocksObj() return the required object to create locks from",function(){
-        // set test parametrs
+        // set test parameters
         let is_locked_for_editing=null;
         let current_editor=null;
         let is_locked_for_moderation_process=null;

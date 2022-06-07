@@ -10,36 +10,36 @@ mongoose.connect(process.env.MONGO_URI)
 
 const settingsSchema = new mongoose.Schema({
   is_premium:{type:Boolean,required:true},
-  excluded_domains:[{type:[String,null],default:null}],
-  excluded_countries_iso:[{type:[String,null],default:null}],
-  excluded_network_endpoints:[{type:[Number,null],default:null}],
+  excluded_domains:[{type:String,default:null}],
+  excluded_countries_iso:[{type:String,default:null}],
+  excluded_network_endpoints:[{type:Number,default:null}],
   age_rating:{type:String,required:true}
 });
 const Settings = mongoose.model("Settings",settingsSchema);
 const mediaSchema = new mongoose.Schema({
-  icon:{type:[String,null],default:null},
-  portrait:[{type:[String,null],default:null}],
-  landscape:[{type:[String,null],default:null}],
-  square:[{type:[String,null],default:null}]
+  icon:{type:String,default:null},
+  portrait:[{type:String,default:null}],
+  landscape:[{type:String,default:null}],
+  square:[{type:String,default:null}]
 });
 const Media = mongoose.model("Media",mediaSchema);
 const LocaleSchema = new mongoose.Schema({
   language_iso:{type:String,required:true},
   title:{type:String,required:true},
-  seo_title:{type:[String,null],default:null},
-  summary:{type:[String],required:true},
-  seo_summary:{type:[String,null],default:null},
-  description:{type:[String],required:true},
-  seo_description:{type:[String,null],default:null},
+  seo_title:{type:String,default:null},
+  summary:{type:String,required:true},
+  seo_summary:{type:String,default:null},
+  description:{type:String,required:true},
+  seo_description:{type:String,default:null},
   specify_seo_values:{type:Boolean,required:true}
 });
 const Locale = mongoose.model("Locale",LocaleSchema);
 const locksSchema = new mongoose.Schema({
-  is_locked_for_editing:{type:[String,null],default:null},
-  current_editor:{type:[String,null],default:null},
-  is_locked_for_moderation_process:{type:[String,null],default:null},
-  is_locked_for_backend_process:{type:[String,null],default:null},
-  current_backend_process:{type:[String,null],default:null}
+  is_locked_for_editing:{type:String,default:null},
+  current_editor:{type:String,default:null},
+  is_locked_for_moderation_process:{type:String,default:null},
+  is_locked_for_backend_process:{type:String,default:null},
+  current_backend_process:{type:String,default:null}
 })
 const Locks = mongoose.model("Locks",locksSchema);
 
@@ -49,14 +49,14 @@ locale:[{type:mongoose.Schema.Types.ObjectId,ref:"Locale"}],
 media:{type:mediaSchema,required:true},
 settings:{type:settingsSchema,required:true},
 locks:{type:locksSchema,required:true},
-parent_id:{type:[String,null],default:null},
-ancestor_ids:[{type:[String,null],default:null}],
-product:{type:[String,null],default:null},
-path:{type:[String,null],default:null},
+parent_id:{type:String,default:null},
+ancestor_ids:[{type:String,default:null}],
+product:{type:String,default:null},
+path:{type:String,default:null},
 is_indexed:{type:Boolean,required:true},
-published_at:{type:[Date,null],default:null},
-created_at:{type:[Date,null],default:null},
-updated_at:{type:[Date,null],default:null}
+published_at:{type:Date,default:null},
+created_at:{type:Date,default:null},
+updated_at:{type:Date,default:null}
 });
 const Category = mongoose.model("Category",categorySchema);
 
@@ -322,9 +322,13 @@ app.use(bodyParse.urlencoded({extended:true}));
 app.use(mult().array())
 app.use(cors());
 app.use(express.static('public'));
+
+//server homepage on root
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
+
+
 //create a category
 
 app.post("/api/create",async (req,res)=>{
@@ -333,7 +337,7 @@ app.post("/api/create",async (req,res)=>{
   let arrLocale=[];
   
     if(!slug){
-      throw "sulg must be provided"
+      throw "slug must be provided"
     }
    if(locale.length>0&&locale.every((val)=>typeof val==="object")){
      for (let index = 0; index < locale.length; index++) {
@@ -391,7 +395,7 @@ app.post("/api/create",async (req,res)=>{
 }catch (e){
   res.json(e)
 }
-})//end of create endpoint
+})//end of POST route
 
 
 app.get("/api/category/:slug",(req,res)=>{
@@ -406,14 +410,57 @@ app.get("/api/category/:slug",(req,res)=>{
   }else{
     res.json({"error":"must provide category"})
   }
-})
+})//end of GET route
 
-app.post("/api/users/:_id/exercises",(req,res)=>{
- 
-});
-app.get("/api/users/:id/logs/",(req,res)=>{
-  
-})
+app.patch("/api/category/:slug", async (req,res)=>{
+  var {slug,locale,media,settings,locks,parent_id,ancestor_ids,product,path,is_indexed,published_at,created_at,updated_at}=req.body;
+  try{
+  let catDoc=await Category.findOne({slug:req.params.slug})
+  if(catDoc){
+    if(slug)catDoc.slug=slug;
+    if(locale)catDoc.locale.push(await new Locale(locale).save());
+    if(media)catDoc.media=await new Media(media).save();
+    if(settings)catDoc.settings=await new Settings(settings).save;
+    if(locks)catDoc.locks=await new Locks(locks).save();
+    if(parent_id)catDoc.parent_id=parent_id;
+    if(ancestor_ids)catDoc.ancestor_ids.push(ancestor_ids);
+    if(product)catDoc.product=product;
+    if(path)catDoc.path=path;
+    if(is_indexed)catDoc.is_indexed=is_indexed;
+    if(published_at!=null&&/^([0-2][0-9]|(3)[0-1])(-)(((0)[0-9])|((1)[0-2]))(-)\d{4}$/.test(published_at))catDoc.published_at=new Date(published_at.replace( /(\d{2})-(\d{2})-(\d{4})/, "$2/$1/$3"));
+    if(created_at!=null&&/^([0-2][0-9]|(3)[0-1])(-)(((0)[0-9])|((1)[0-2]))(-)\d{4}$/.test(created_at))catDoc.created_at=new Date(created_at.replace( /(\d{2})-(\d{2})-(\d{4})/, "$2/$1/$3"));
+    if(updated_at!=null&&/^([0-2][0-9]|(3)[0-1])(-)(((0)[0-9])|((1)[0-2]))(-)\d{4}$/.test(updated_at))catDoc.updated_at=new Date(updated_at.replace( /(\d{2})-(\d{2})-(\d{4})/, "$2/$1/$3"));
+    await catDoc.save();
+    console.log(catDoc);
+    res.json(catDoc);
+  }else{
+    res.json({error:`slug: ${req.params.slug} not found`});
+  }
+}catch(e){
+  console.error(e);
+  res.json(e);
+}
+
+});//end of PATCH route
+
+
+app.delete("/api/category/:slug",(req,res)=>{
+  Category.findOneAndDelete({slug:req.params.slug},(err,doc)=>{
+    if(err){
+      res.json(err)
+    }else{
+      if(doc===null){
+        res.json({error:`category ${req.params.slug} not found`})
+      }else{
+        res.json({status:"deleted document",document:doc});
+      }
+    }
+  });//associated schemas will still exist in the database 
+
+
+})// end of DELETE route
+
+
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
 })

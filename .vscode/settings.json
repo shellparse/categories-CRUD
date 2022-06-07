@@ -1,5 +1,9 @@
 {
     "[markdown]": {
         "cSpell.showAutocompleteSuggestions": true
-    }
+    },
+    "cSpell.words": [
+        "Dups",
+        "mult"
+    ]
 }
